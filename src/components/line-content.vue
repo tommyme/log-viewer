@@ -1,7 +1,7 @@
 <template>
   <div class="line-content">
     <span
-      v-for="(item, index) in content"
+      v-for="(item, index) in content.val"
       :key="index"
       :class="[
         {
@@ -12,20 +12,17 @@
         item.foreground ? 'log-fore-' + item.foreground : '',
         item.background ? 'log-back-' + item.background : ''
       ]"
-      >{{ item.text }}</span
-    >
+      >{{ item.text }}</span>
   </div>
 </template>
-<script>
-export default {
-  name: 'LineContent',
-  props: {
-    /**
-     * log text content
-     */
-    content: Array
+<script setup>
+import { defineProps } from 'vue';
+const props = defineProps({
+  content: {
+    required: true
   }
-}
+})
+console.log("content", props.content.val)
 </script>
 
 <style lang="less">

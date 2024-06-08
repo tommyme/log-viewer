@@ -1,12 +1,10 @@
 <template>
-  <div class="line-number" :class="className">{{ number }}</div>
+  <div class="line-number">{{ number }}</div>
 </template>
-<script>
-export default {
-  name: 'LineNumber',
-  props: {
-    number: Number,
-    className: [String, Array, Object]
-  }
-}
+<script setup>
+import { defineProps } from 'vue';
+defineProps({
+  number: {required: true},
+})
+
 </script>

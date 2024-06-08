@@ -9,10 +9,7 @@
     </slot>
   </span>
 </template>
-<script>
-export default {
-  name: 'LogLoading'
-}
+<script setup>
 </script>
 
 <style lang="less">
