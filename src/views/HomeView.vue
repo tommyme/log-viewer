@@ -76,3 +76,5 @@ function socket_get_data(payload) {
     <LogViewer :log="log" :loading="loading"></LogViewer>
   </div>
 </template>
+<style lang="less" scoped>
+</style>

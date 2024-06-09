@@ -1,8 +1,8 @@
 <template>
   <div style="position: relative;">
     <virtual-list
-      style="height: 360px; overflow-y: auto;"
-      class="log-viewer"
+      style="height: 480px; overflow-y: auto;"
+      class="log-viewer mono"
       ref="virturalList"
       v-bind="virtualAttrs"
       :data-component="LineWrapper"
@@ -11,8 +11,10 @@
       :keeps="30"
     >
     </virtual-list>
-    <div style="position: absolute;bottom: 4px;right: 24px;">
-      <el-switch v-model="toBottom" />
+    <div class="switch">
+      <el-switch v-model="toBottom" size="large" 
+      inline-prompt active-text="实时查看" inactive-text="实时查看"
+      style="--el-switch-off-color: #636e72"/>
     </div>
   </div>
 </template>
@@ -193,11 +195,48 @@ function onscroll(event, data) {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .log-viewer {
-  font-size: 12px;
-  background-color: #222;
+  width: 98%;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.8;
+  background-color: #2d3436;
   overflow-x: auto;
   padding: 20px 0;
+  border-radius: 14px;
+  border: 4px solid #fff;
+  box-shadow: #999999 0px 0px 8px;
+}
+/* 整体样式 */
+::-webkit-scrollbar {
+    width: 8px; /* 纵向滚动条的宽度 */
+    height: 8px; /* 横向滚动条的高度 */
+}
+
+/* 滚动条轨道 */
+::-webkit-scrollbar-track {
+    background-color: transparent; /* 滚动条轨道透明 */
+}
+
+/* 滚动条滑块 */
+::-webkit-scrollbar-thumb {
+    background-color: #ccc; /* 滚动条滑块浅色 */
+    border-radius: 4px; /* 滚动条滑块圆角 */
+}
+
+/* 滚动条滑块hover状态 */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #999; /* 滚动条滑块hover颜色加深 */
+}
+
+
+.switch{
+  position: absolute;
+  bottom: 0.6%;
+  right:2.2%;
+}
+:deep(.el-switch__inner .is_text){
+  color: #2d3436;
 }
 </style>
