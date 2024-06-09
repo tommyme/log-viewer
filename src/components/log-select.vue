@@ -8,6 +8,11 @@
     @focus="handleFocus"
     style="width: 450px;"
     filterable>
+    <template #default="{ node, data }" style="position: relative;">
+      <span>{{ data.label }}</span>
+      <span v-if="!node.isLeaf"> ({{ node.children.length }}) </span>
+      <el-button @click="handleDelete($event, node)" type="danger" circle style="width: 10px; height: 10px; position: absolute; right: 12px; top: 8px" >x</el-button>
+    </template>
   </el-cascader>
   <el-cascader
     v-model="selectedLogger"
@@ -15,6 +20,11 @@
     :props="loggerProps"
     :disabled="selectedOptions.length == 0"
     filterable>
+    <template #default="{ node, data }">
+      <span>{{ data.label }}</span>
+      <!-- <el-button @click="mylog(node)">x</el-button> -->
+      <span v-if="!node.isLeaf"> ({{ node.children.length }}) </span>
+    </template>
   </el-cascader>
   <el-button @click="clickbtn" :disabled="!socketEnable">query</el-button>
   <el-radio-group v-model="logLevelRadio" size="small">
@@ -37,7 +47,10 @@ const logLevelRadioOpts = ["ALL", "INFO", "DEBUG", "WARNING", "ERROR"]
 const socketEnable = computed(() => {
   return selectedOptions.value.length > 0 && selectedLogger.value.length > 0
 })
-
+const handleDelete = (event, node) => {
+  event.stopPropagation();
+  mylog(concat_objs(node.pathValues))
+}
 const socket_payload = computed(() => {
   if (selectedLogger.value.length == 2) {
     const b = selectedLogger.value[1] === "ALL" ? {} : selectedLogger.value[1]
@@ -52,9 +65,7 @@ const props = {
   lazy: true,
   lazyLoad(node, resolve) {
     // 模拟异步加载数据
-    const path_values = node.pathValues.reduce((acc, obj) => {
-      return { ...acc, ...obj };
-    }, {});
+    const path_values = concat_objs(node.pathValues)
     const { level } = node
     const nodes = []
     axios.post('/sel', path_values, {
@@ -80,9 +91,7 @@ const loggerProps = {
   lazy: true,
   lazyLoad(node, resolve) {
     // 模拟异步加载数据
-    const path_values = selectedOptions.value.reduce((acc, obj) => {
-      return { ...acc, ...obj };
-    }, {});
+    const path_values = concat_objs(selectedOptions.value)
 
     const { level } = node
     if (level == 0) {
@@ -110,6 +119,12 @@ const loggerProps = {
       })
     }
   }
+}
+
+const concat_objs = (objs) => {
+  return objs.reduce((acc, obj) => {
+    return { ...acc, ...obj };
+  }, {});
 }
 const clickbtn = () => {
   mylog("selected",selectedOptions.value)
