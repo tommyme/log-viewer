@@ -6,13 +6,15 @@
     @change="handleChange"
     @expand-change="handleExpandChange"
     @focus="handleFocus"
-    style="width: 450px;">
+    style="width: 450px;"
+    filterable>
   </el-cascader>
   <el-cascader
     v-model="selectedLogger"
     placeholder="select logger"
     :props="loggerProps"
-    :disabled="selectedOptions.length == 0">
+    :disabled="selectedOptions.length == 0"
+    filterable>
   </el-cascader>
   <el-button @click="clickbtn" :disabled="!socketEnable">query</el-button>
   <el-radio-group v-model="logLevelRadio" size="small">
