@@ -37,6 +37,7 @@ function socket_get_data(payload) {
   curr_socket.onopen = function(event) {
     // console.log('WebSocket connection established.');
     // 定时发送请求
+    sendRequest()
     intervalId = setInterval(sendRequest, 1000);
   };
 
