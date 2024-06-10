@@ -9,28 +9,30 @@
           <el-input v-model="port" placeholder="Enter port"></el-input>
         </el-col>
         <el-col :span="8">
-          <el-button type="primary" @click="connect">Connect</el-button>
+          <el-button type="primary" @click="connect" :icon="Connection" >Connect</el-button>
         </el-col>
       </el-row>
     </el-header>
-    <el-main>
-      <el-card v-if="connected">
+    <div>
+      <div v-if="connected">
         <LogViewer :log="log" :loading="false" />
-        <el-input
+        <div class="input">
+          <el-input
           v-model="input"
           @keyup.enter="sendMessage"
           placeholder="Enter command"
-          class="input"
         ></el-input>
-        <el-button @click="telnetview_log(log)">check log</el-button>
-      </el-card>
+        </div>
+        <el-button @click="telnetview_log(log)" >check log</el-button>
+      </div>
       <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers></prism-editor>
 
-    </el-main>
+    </div>
   </el-container>
 </template>
 
 <script setup>
+import {Connection} from '@element-plus/icons-vue';
 import { ref } from 'vue'
 import { PrismEditor } from 'vue-prism-editor';
 import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
@@ -110,18 +112,23 @@ const sendMessage = () => {
 }
 
 .input {
-  width: 100%;
+  width: 98%;
+  margin: 10px auto;
 }
 
 .my-editor {
-  background: #2d2d2d;
+  background-color: #2d3436;
   color: #ccc;
-
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
   height: 400px;
+  width: 98%;
+  margin: 10px auto;
+  border-radius: 14px;
+  border: 4px solid #fff;
+  box-shadow: #999999 0px 0px 8px;
 }
 
 .prism-editor__textarea:focus {
