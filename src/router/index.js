@@ -6,6 +6,7 @@ const router = createRouter({
   routes: [
     // { path: '/', name: 'home', component: ()=>{import('../views/HomeView.vue')} },
     { path: '/', name: 'home', component: HomeView },
+    { path: '/telnet', name: 'telnet', component: () => import('../views/TelnetView.vue') },
   ]
 })
 
