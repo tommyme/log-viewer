@@ -29,8 +29,8 @@
 
     <div class="col">
       <div class="radio_btn">
-        <el-radio-group v-model="logLevelRadio">
-          <el-radio-button v-for="opt in logLevelRadioOpts" :key="opt" :label="opt" :value="opt" />
+        <el-radio-group v-model="logLevelRadio" text-color="#fff" >
+          <el-radio-button v-for="opt in logLevelRadioOpts"  :class="opt" :key="opt" :label="opt" :value="opt" />
         </el-radio-group>
       </div>
     </div>
@@ -172,6 +172,41 @@ const handleFocus = () => {
 
   .radio_btn {
     margin: 0 20px;
+  }
+}
+.ALL{
+  :deep(.el-radio-button__original-radio:checked+.el-radio-button__inner){
+    background-color: blue;
+    border-color:blue;
+    box-shadow: -1px 0 0 0 blue;
+  }
+}
+.INFO{
+  :deep(.el-radio-button__original-radio:checked+.el-radio-button__inner){
+    background-color: green;
+    border-color:green;
+    box-shadow: -1px 0 0 0 green;
+  }
+}
+.DEBUG{
+  :deep(.el-radio-button__original-radio:checked+.el-radio-button__inner){
+    background-color: gray;
+    border-color:gray;
+    box-shadow: -1px 0 0 0 gray;
+  }
+}
+.WARNING{
+  :deep(.el-radio-button__original-radio:checked+.el-radio-button__inner){
+    background-color: orange;
+    border-color:orange;
+    box-shadow: -1px 0 0 0 orange;
+  }
+}
+.ERROR{
+  :deep(.el-radio-button__original-radio:checked+.el-radio-button__inner){
+    background-color: red;
+    border-color:red;
+    box-shadow: -1px 0 0 0 red;
   }
 }
 

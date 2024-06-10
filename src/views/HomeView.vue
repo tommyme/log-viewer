@@ -74,14 +74,19 @@ function socket_get_data(payload) {
 <template>
   <div>
     <LogSelect @ready="payload => socket_get_data(payload)"></LogSelect>
-    <el-input
+    <div class="filter_input">
+      <el-input
       v-model="filter_val"
       style="width: 240px"
       placeholder="filter"
       clearable
     />
+    </div>
     <LogViewer :log="log" :loading="loading" :filter-val="filter_val"></LogViewer>
   </div>
 </template>
 <style lang="less" scoped>
+.filter_input{
+  margin: 10px 20px;
+}
 </style>
