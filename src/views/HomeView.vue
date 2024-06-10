@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import LogViewer from '../components/log-viewer.vue';
 import LogSelect from '../components/log-select.vue'
 const loading = ref(false)
@@ -8,6 +8,7 @@ const viewlog = (...content) => {
   console.log("home view", ...content)
 }
 let curr_socket = null
+const filter_val = ref("")
 
 function socket_get_data(payload) {
   let lock = false;
@@ -73,7 +74,13 @@ function socket_get_data(payload) {
 <template>
   <div>
     <LogSelect @ready="payload => socket_get_data(payload)"></LogSelect>
-    <LogViewer :log="log" :loading="loading"></LogViewer>
+    <el-input
+      v-model="filter_val"
+      style="width: 240px"
+      placeholder="filter"
+      clearable
+    />
+    <LogViewer :log="log" :loading="loading" :filter-val="filter_val"></LogViewer>
   </div>
 </template>
 <style lang="less" scoped>

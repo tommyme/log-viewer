@@ -22,7 +22,6 @@ const props = defineProps({
     required: true
   }
 })
-console.log("content", props.content.val)
 </script>
 
 <style lang="less">

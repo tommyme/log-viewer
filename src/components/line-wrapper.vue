@@ -18,7 +18,6 @@ const props = defineProps({
   }
 })
 
-console.log("wrapper", props.source)
 </script>
 <style lang="less">
 .line-wrapper {

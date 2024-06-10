@@ -1,14 +1,15 @@
 <template>
   <div style="position: relative;">
     <virtual-list
-      style="height: 480px; overflow-y: auto;"
+      style="max-height: 880px; overflow-y: auto;"
       class="log-viewer mono"
       ref="virturalList"
       v-bind="virtualAttrs"
       :data-component="LineWrapper"
-      :data-sources="lines"
+      :data-sources="filtered_lines"
       data-key="id"
-      :keeps="30"
+      :keeps="60"
+      :estimate-size="20"
     >
     </virtual-list>
     <div class="switch">
@@ -85,11 +86,14 @@ const props = defineProps({
   scrollDuration: {
     type: Number,
     default: 0
+  },
+  filterVal: {
+    type: String,
+    default: ""
   }
 })
 const toBottom = ref(false)
 const virturalList = ref(null)
-console.log(virturalList)
 const start = ref(0)
 const scrollStart = ref(0)
 const animate = ref(null)
@@ -115,6 +119,23 @@ const lines = computed(() => {
   })
   return res
 })
+
+const filtered_lines = computed(() => {
+  if (props.filterVal == "") {
+    return lines.value
+  } else {
+    return lines.value.filter((line_sections, idx) => {
+      if (concat_sections_text(line_sections.val).includes(props.filterVal)) {
+        return true
+      }
+    })
+  }
+})
+
+const concat_sections_text = (sections) => {
+  return sections.map(({ text }) => text).join('');
+}
+
 const linesCount = computed(() => lines.value.length + (props.loading ? 1 : 0))
 
 watch(
@@ -124,7 +145,6 @@ watch(
       virturalList.value.scrollToBottom()
     }
   },
-  // { immediate: true }
 )
 
 function forceRender() {
