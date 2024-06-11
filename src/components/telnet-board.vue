@@ -1,5 +1,5 @@
 <template>
-  <el-container style="width: 600px;">
+  <el-container style="width: 750px;">
     <el-header>
       <el-row :gutter="10">
         <el-col :span="6">
@@ -40,7 +40,7 @@ import 'element-plus/dist/index.css'
 import LogViewer from '../components/log-viewer.vue';
 import scriptEditor from '../components/script-editor.vue';
 import axios from '../req'
-const line_break_sel = ref("\r\n")
+const line_break_sel = ref("\r")
 const scriptEditorRef = ref()
 const line_breaks_ops = [
   { value: '\r\n',label: '\\r\\n' },
@@ -134,12 +134,12 @@ const connect = () => {
 }
 
 const sendMessage = () => {
-  socket.send(JSON.stringify({ command: input.value + "\r\n" }))
+  socket.send(JSON.stringify({ command: input.value + line_break_sel.value }))
   input.value = ''
 }
 
 const handleSendCmd = (data) => {
-  socket.send(JSON.stringify({ command: data + "\r\n" }))
+  socket.send(JSON.stringify({ command: data + line_break_sel.value }))
 }
 
 const props = {
