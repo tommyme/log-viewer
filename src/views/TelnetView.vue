@@ -1,50 +1,71 @@
 <template>
-  <el-container>
+  <el-container style="width: 600px;">
     <el-header>
-      <el-row :gutter="20">
-        <el-col :span="8">
+      <el-row :gutter="10">
+        <el-col :span="6">
+          <el-cascader v-model="selectedScript" placeholder="select script" :props="props" filterable clearable @change="changeit" />
+        </el-col>
+        <el-col :span="6">
           <el-input v-model="address" placeholder="Enter address"></el-input>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="6">
           <el-input v-model="port" placeholder="Enter port"></el-input>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="6">
           <el-button type="primary" @click="connect" :icon="Connection" >Connect</el-button>
         </el-col>
       </el-row>
-      <el-cascader v-model="selectedScript" placeholder="select case iteration" :props="props" filterable />
     </el-header>
     <div>
       <div v-if="connected">
         <LogViewer :height="500" :log="log" :loading="false" />
-        <div class="input">
-          <el-input
-          v-model="input"
-          @keyup.enter="sendMessage"
-          placeholder="Enter command"
-        ></el-input>
+        <div class="input" style="display: flex">
+          <el-input v-model="input" @keyup.enter="sendMessage" placeholder="Enter command"></el-input>
+          <el-cascader v-model="line_break_sel" :options="line_breaks_ops"/>
         </div>
         <el-button @click="telnetview_log(log)" >check log</el-button>
-        <script-editor @sendcmd="handleSendCmd($event)"></script-editor>
       </div>
-
+      
+      <script-editor v-model:code="code" @sendcmd="handleSendCmd($event)"></script-editor>
+      <el-button @click="telnetview_log(selectedScript)" >check script</el-button>
     </div>
   </el-container>
 </template>
 
 <script setup>
 import {Connection} from '@element-plus/icons-vue';
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
 import LogViewer from '../components/log-viewer.vue';
 import scriptEditor from '../components/script-editor.vue';
 import axios from '../req'
-
-const selectedScript = ref("")
-const code = ref("console.log('hello world')")
-const address = ref('127.0.0.1')
-const port = ref('6023')
+const line_break_sel = ref("\r\n")
+const line_breaks_ops = [
+  { value: '\r\n',label: '\\r\\n' },
+  { value: '\r',label: '\\r' },
+  { value: '\n',label: '\\n' },
+]
+const changeit = (val) => {
+  if (val === undefined) {
+    selectedScript.value = [{
+      content: "",
+      host: "",
+      port: "",
+      name: ""
+    }]
+  }
+  code.value = selectedScript.value[0].content
+}
+const selectedScript = ref([{
+  content: "",
+  host: "",
+  port: "",
+  name: ""
+}])
+const code = ref("")
+const address = computed(() => selectedScript.value[0].host)
+const port = computed(() => selectedScript.value[0].port)
 const input = ref('')
 const connected = ref(false)
 const log = ref([])
@@ -103,6 +124,7 @@ const props = {
         'Content-Type': 'application/json'
       },
     }).then(resp => {
+      console.log("here")
       nodes.push(
         ...resp.data.map((item, index) => {
           return { ...item, leaf: true }
@@ -139,5 +161,10 @@ const props = {
   margin: 10px auto;
 }
 
+</style>
 
+<style>
+.log-viewer {
+  height: 500px
+}
 </style>

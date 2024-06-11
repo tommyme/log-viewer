@@ -1,17 +1,22 @@
 <template>
-  <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers></prism-editor>
+  <prism-editor
+    class="my-editor"
+    v-model="props.code"
+    :highlight="highlighter"
+    line-numbers
+  ></prism-editor>
   <el-button @click="sendCurrLine">curr</el-button>
   <el-button @click="sendCurrLineMove">next</el-button>
 </template>
 
 <script setup>
-import {ref} from "vue";
-import { PrismEditor } from 'vue-prism-editor';
+import { ref } from "vue";
+import { PrismEditor } from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
 const mylog = (...content) => {
-  console.log("editor", ...content)
-}
-const emit = defineEmits(['sendcmd'])
+  console.log("editor", ...content);
+};
+const emit = defineEmits(["sendcmd"]);
 // import highlighting library (you can use any library you want just return html string)
 import { highlight, languages } from "prismjs/components/prism-core";
 // import "prismjs/components/prism-clike";
@@ -19,23 +24,26 @@ import { highlight, languages } from "prismjs/components/prism-core";
 import "prismjs/components/prism-bash";
 import "prismjs/themes/prism-tomorrow.css"; // import syntax highlighting styles
 const highlighter = (code) => highlight(code, languages.bash); //returns html
-const code = ref(`
-# this is a comment
-cat install.sh
-./download.sh
 
-sleep 3
-# please reboot it...
-
-`)
+const props = defineProps({
+  code: {
+    type: String,
+    required: true,
+    writable: true,
+  },
+});
 
 // const currLine = editor_textarea.selectionStart
 function getLineNumber() {
-  const editor_textarea = document.querySelector(".prism-editor__textarea")
+  const editor_textarea = document.querySelector(".prism-editor__textarea");
   if (editor_textarea) {
-    return editor_textarea.value.substr(0, editor_textarea.selectionStart).split("\n").length-1;
+    return (
+      editor_textarea.value
+        .substr(0, editor_textarea.selectionStart)
+        .split("\n").length - 1
+    );
   } else {
-    return null
+    return null;
   }
 }
 function selectNextLineEnd() {
@@ -58,7 +66,7 @@ function selectNextLineEnd() {
     // 设置光标位置并选中文本
     editor_textarea.selectionStart = nextLineEndPos;
     editor_textarea.selectionEnd = nextLineEndPos;
-    console.log(editor_textarea.selectionStart, editor_textarea.selectionEnd)
+    console.log(editor_textarea.selectionStart, editor_textarea.selectionEnd);
     editor_textarea.focus();
   } else {
     return null;
@@ -80,13 +88,13 @@ function getCursorLineContent() {
   }
 }
 function sendCurrLine() {
-  const line = getCursorLineContent()
-  console.log(line)
-  emit("sendcmd", line)
+  const line = getCursorLineContent();
+  console.log(line);
+  emit("sendcmd", line);
 }
 function sendCurrLineMove() {
-  sendCurrLine()
-  selectNextLineEnd()
+  sendCurrLine();
+  selectNextLineEnd();
 }
 </script>
 
@@ -95,7 +103,13 @@ function sendCurrLineMove() {
   background: #2d3436;
   color: #ccc;
 
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-family:
+    Fira code,
+    Fira Mono,
+    Consolas,
+    Menlo,
+    Courier,
+    monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
