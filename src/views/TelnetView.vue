@@ -12,6 +12,7 @@
           <el-button type="primary" @click="connect" :icon="Connection" >Connect</el-button>
         </el-col>
       </el-row>
+      <el-cascader v-model="selectedScript" placeholder="select case iteration" :props="props" filterable />
     </el-header>
     <div>
       <div v-if="connected">
@@ -38,8 +39,9 @@ import { ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
 import LogViewer from '../components/log-viewer.vue';
 import scriptEditor from '../components/script-editor.vue';
+import axios from '../req'
 
-
+const selectedScript = ref("")
 const code = ref("console.log('hello world')")
 const address = ref('127.0.0.1')
 const port = ref('6023')
@@ -88,6 +90,31 @@ const sendMessage = () => {
 
 const handleSendCmd = (data) => {
   socket.send(JSON.stringify({ command: data + "\r\n" }))
+}
+
+const props = {
+  lazy: true,
+  lazyLoad(node, resolve) {
+    // 模拟异步加载数据
+    const { level } = node
+    const nodes = []
+    axios.post('/script/all', {}, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then(resp => {
+      nodes.push(
+        ...resp.data.map((item, index) => {
+          return { ...item, leaf: true }
+        }),
+      )
+      resolve(nodes)
+    }).catch(err => {
+      mylog(err)
+    })
+
+    // 返回子节点数据
+  }
 }
 </script>
 
