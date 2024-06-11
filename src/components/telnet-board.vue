@@ -27,6 +27,7 @@
       
       <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)"></script-editor>
       <el-button @click="telnetview_log(selectedScript)" >check script</el-button>
+      <el-button @click="save_script" >save</el-button>
     </div>
   </el-container>
 </template>
@@ -50,6 +51,7 @@ const scriptChange = (val) => {
   // 清空的时候 初始化
   if (val === undefined) {
     selectedScript.value = [{
+      id: null,
       content: "",
       host: "",
       port: "",
@@ -61,6 +63,7 @@ const scriptChange = (val) => {
 }
 
 const selectedScript = ref([{
+  id: null,
   content: "",
   host: "",
   port: "",
@@ -75,6 +78,18 @@ let socket = null
 const telnetview_log = (...content) => {
   console.log('telnetview', ...content)
   console.log('script', scriptEditorRef.value.code)
+}
+const save_script = () => {
+  let payload = {...selectedScript.value[0], ...{content: scriptEditorRef.value.code}}
+  axios.post('/script/update', payload, {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  }).then(resp => {
+    console.log(resp)
+  }).catch(err => {
+    mylog(err)
+  })
 }
 const connect = () => {
   if (!address.value || !port.value) {
