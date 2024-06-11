@@ -3,7 +3,7 @@
     <el-header>
       <el-row :gutter="10">
         <el-col :span="6">
-          <el-cascader v-model="selectedScript" placeholder="select script" :props="props" filterable clearable @change="changeit" />
+          <el-cascader v-model="selectedScript" placeholder="select script" :props="props" filterable clearable @change="scriptChange" />
         </el-col>
         <el-col :span="6">
           <el-input v-model="address" placeholder="Enter address"></el-input>
@@ -26,7 +26,7 @@
         <el-button @click="telnetview_log(log)" >check log</el-button>
       </div>
       
-      <script-editor v-model:code="code" @sendcmd="handleSendCmd($event)"></script-editor>
+      <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)"></script-editor>
       <el-button @click="telnetview_log(selectedScript)" >check script</el-button>
     </div>
   </el-container>
@@ -41,12 +41,14 @@ import LogViewer from '../components/log-viewer.vue';
 import scriptEditor from '../components/script-editor.vue';
 import axios from '../req'
 const line_break_sel = ref("\r\n")
+const scriptEditorRef = ref()
 const line_breaks_ops = [
   { value: '\r\n',label: '\\r\\n' },
   { value: '\r',label: '\\r' },
   { value: '\n',label: '\\n' },
 ]
-const changeit = (val) => {
+const scriptChange = (val) => {
+  // 清空的时候 初始化
   if (val === undefined) {
     selectedScript.value = [{
       content: "",
@@ -55,15 +57,16 @@ const changeit = (val) => {
       name: ""
     }]
   }
-  code.value = selectedScript.value[0].content
+  // 改code
+  scriptEditorRef.value.code = selectedScript.value[0].content
 }
+
 const selectedScript = ref([{
   content: "",
   host: "",
   port: "",
   name: ""
 }])
-const code = ref("")
 const address = computed(() => selectedScript.value[0].host)
 const port = computed(() => selectedScript.value[0].port)
 const input = ref('')
@@ -72,6 +75,7 @@ const log = ref([])
 let socket = null
 const telnetview_log = (...content) => {
   console.log('telnetview', ...content)
+  console.log('script', scriptEditorRef.value.code)
 }
 const connect = () => {
   if (!address.value || !port.value) {

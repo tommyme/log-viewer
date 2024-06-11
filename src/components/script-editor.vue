@@ -1,7 +1,7 @@
 <template>
   <prism-editor
     class="my-editor"
-    v-model="props.code"
+    v-model="code"
     :highlight="highlighter"
     line-numbers
   ></prism-editor>
@@ -12,6 +12,7 @@
 <script setup>
 import { ref } from "vue";
 import { PrismEditor } from "vue-prism-editor";
+// import { expose } from 'vue';
 import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
 const mylog = (...content) => {
   console.log("editor", ...content);
@@ -25,14 +26,10 @@ import "prismjs/components/prism-bash";
 import "prismjs/themes/prism-tomorrow.css"; // import syntax highlighting styles
 const highlighter = (code) => highlight(code, languages.bash); //returns html
 
-const props = defineProps({
-  code: {
-    type: String,
-    required: true,
-    writable: true,
-  },
-});
-
+const code = ref("init")
+defineExpose({
+  code
+})
 // const currLine = editor_textarea.selectionStart
 function getLineNumber() {
   const editor_textarea = document.querySelector(".prism-editor__textarea");
