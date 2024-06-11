@@ -26,7 +26,7 @@ import "prismjs/components/prism-bash";
 import "prismjs/themes/prism-tomorrow.css"; // import syntax highlighting styles
 const highlighter = (code) => highlight(code, languages.bash); //returns html
 
-const code = ref("init")
+const code = ref("")
 defineExpose({
   code
 })

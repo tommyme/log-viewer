@@ -60,6 +60,8 @@ const scriptChange = (val) => {
   }
   // 改code
   scriptEditorRef.value.code = selectedScript.value[0].content
+  port.value = selectedScript.value[0].port
+  address.value = selectedScript.value[0].host
 }
 
 const selectedScript = ref([{
@@ -69,8 +71,8 @@ const selectedScript = ref([{
   port: "",
   name: ""
 }])
-const address = computed(() => selectedScript.value[0].host)
-const port = computed(() => selectedScript.value[0].port)
+const address = ref("")
+const port = ref("")
 const input = ref('')
 const connected = ref(false)
 const log = ref([])
@@ -80,13 +82,22 @@ const telnetview_log = (...content) => {
   console.log('script', scriptEditorRef.value.code)
 }
 const save_script = () => {
-  let payload = {...selectedScript.value[0], ...{content: scriptEditorRef.value.code}}
+  let payload = {
+    ...selectedScript.value[0],   // 这里无法改name
+    ...{
+      content: scriptEditorRef.value.code,
+      port: port.value,
+      host: address.value,
+    }
+  }
   axios.post('/script/update', payload, {
     headers: {
       'Content-Type': 'application/json'
     },
   }).then(resp => {
-    console.log(resp)
+    if (resp.status == 200) {
+      ElMessage.success('saved')
+    }
   }).catch(err => {
     mylog(err)
   })
