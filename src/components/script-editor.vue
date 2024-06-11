@@ -6,7 +6,7 @@
     line-numbers
   ></prism-editor>
   <el-button @click="sendCurrLine">curr</el-button>
-  <el-button @click="sendCurrLineMove">next</el-button>
+  <el-button @click="sendCurrLineMove" type="primary">next</el-button>
 </template>
 
 <script setup>

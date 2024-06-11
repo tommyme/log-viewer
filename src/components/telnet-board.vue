@@ -1,9 +1,14 @@
 <template>
-  <el-container style="width: 750px;">
+  <div style="width: 750px;">
     <el-header>
       <el-row :gutter="10">
         <el-col :span="6">
-          <el-cascader v-model="selectedScript" placeholder="select script" :props="props" filterable clearable @change="scriptChange" />
+          <!-- 这里@clear用来触发computed -->
+          <el-select v-model="selectedProfileName" clearable allow-create filterable 
+            placeholder="select profile" @change="profileChange" @clear="() => selectedProfileItem"
+          >
+            <el-option v-for="item in profiles" :key="item.name" :label="item.name" :value="item.name"/>
+          </el-select>
         </el-col>
         <el-col :span="4">
           <el-input v-model="address" placeholder="addr"></el-input>
@@ -12,29 +17,37 @@
           <el-input v-model="port" placeholder="port"></el-input>
         </el-col>
         <el-col :span="2">
-          <el-button type="primary" @click="connect" :icon="Connection" ></el-button>
+          <el-button type="primary" @click="connect_to_socket" :icon="Connection" ></el-button>
+        </el-col>
+        <el-col :span="6">
+          <el-select 
+            v-model="selectedScriptName" clearable allow-create filterable 
+            placeholder="select script" @change="scriptChange" :disabled="!selectedProfileItemIsFromDB"
+          >
+            <el-option v-for="item in scripts" :key="item.sname" :label="item.sname" :value="item.sname"/>
+          </el-select>
         </el-col>
       </el-row>
     </el-header>
     <div>
       <div v-if="connected">
-        <LogViewer :height="500" :log="log" :loading="false" />
+        <LogViewer :height="500" :log="logFromTelnet" :loading="false" />
         <div class="input" style="display: flex">
-          <el-input v-model="input" @keyup.enter="sendMessage" placeholder="Enter command"></el-input>
+          <el-input v-model="commandToSend" @keyup.enter="sendMessage" placeholder="Enter command"></el-input>
           <el-cascader v-model="line_break_sel" :options="line_breaks_ops"/>
         </div>
       </div>
       
       <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)"></script-editor>
-      <el-button @click="telnetview_log(selectedScript)" >check script</el-button>
+      <el-button @click="telnetview_log(selectedProfileItem, selectedScriptItem, selectedProfileItemIsFromDB)" >check script</el-button>
       <el-button @click="save_script" >save</el-button>
     </div>
-  </el-container>
+  </div>
 </template>
 
 <script setup>
 import {Connection} from '@element-plus/icons-vue';
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
 import LogViewer from '../components/log-viewer.vue';
@@ -47,67 +60,126 @@ const line_breaks_ops = [
   { value: '\r',label: '\\r' },
   { value: '\n',label: '\\n' },
 ]
-const scriptChange = (val) => {
+onMounted(() => {
+  loadProfiles()
+})
+const loadProfiles = () => {
+  axios.post_json('/script/allProfiles', {}, (resp) => {profiles.value = resp.data})
+}
+const loadScripts = () => {
+  axios.post_json('/script/allScripts', {name: selectedProfileItem.value.name}, (resp) => {scripts.value = resp.data})
+}
+const profileChange = (val) => {
   // 清空的时候 初始化
   if (val === undefined) {
-    selectedScript.value = [{
-      id: null,
-      content: "",
+    port.value = ''
+    address.value = ''
+    scripts.value = []
+    selectedScriptName.value = undefined
+    // todo: clear code
+  } else {
+    port.value = selectedProfileItem.value.port
+    address.value = selectedProfileItem.value.host
+    loadScripts()
+  }
+}
+const scriptChange = (val) => {
+  if (val === undefined) {
+    scriptEditorRef.value.code = ""
+  } else {
+    scriptEditorRef.value.code = selectedScriptItem.value.content
+  }
+}
+const profiles = ref([])
+const scripts = ref([])
+
+const selectedProfileName = ref(undefined)  // 默认值
+const selectedProfileItem = computed(() => {
+  if (selectedProfileName.value === undefined) {
+    selectedProfileItemIsFromDB.value = false
+    return {
+      name: "",
       host: "",
       port: "",
-      name: ""
-    }]
+    }
+  } else {
+    let found = profiles.value.find(item => item.name == selectedProfileName.value)
+    if (found) {
+      selectedProfileItemIsFromDB.value = true
+      return found
+    } else {
+      selectedProfileItemIsFromDB.value = false
+      return {
+        name: selectedProfileName.value,
+        host: "",
+        port: "",
+      }
+    }
   }
-  // 改code
-  scriptEditorRef.value.code = selectedScript.value[0].content
-  port.value = selectedScript.value[0].port
-  address.value = selectedScript.value[0].host
-}
+})
+const selectedProfileItemIsFromDB = ref(false)
+const selectedScriptItemIsFromDB = ref(false)
 
-const selectedScript = ref([{
-  id: null,
-  content: "",
-  host: "",
-  port: "",
-  name: ""
-}])
+const selectedScriptName = ref(undefined)
+const selectedScriptItem = computed(() => {
+  if (selectedScriptName.value === undefined) {   // 清空之后
+    selectedScriptItemIsFromDB.value = false
+    return {
+      name: "",
+      content: "",
+      profile: selectedProfileItem.value.id,
+    }
+  } else {
+    let found = scripts.value.find(item => item.sname == selectedScriptName.value)
+    if (found) {    // 从选择框里面选
+      selectedScriptItemIsFromDB.value = true
+      return found
+    } else {        // 自定义添加的
+      selectedScriptItemIsFromDB.value = false
+      return {
+        name: selectedScriptName.value,
+        content: "",
+        profile: "",
+      }
+    }
+  }
+})
+
 const address = ref("")
 const port = ref("")
-const input = ref('')
+const commandToSend = ref('')
 const connected = ref(false)
-const log = ref([])
+const logFromTelnet = ref([])
 let socket = null
 const telnetview_log = (...content) => {
   console.log('telnetview', ...content)
-  console.log('script', scriptEditorRef.value.code)
 }
 const save_script = () => {
   let payload = {
-    ...selectedScript.value[0],   // 这里无法改name
+    ...selectedProfileItem.value,
+    ...selectedScriptItem.value,
     ...{
       content: scriptEditorRef.value.code,
       port: port.value,
       host: address.value,
     }
   }
-  axios.post('/script/update', payload, {
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  }).then(resp => {
-    if (resp.status == 200) {
-      ElMessage.success('saved')
-    }
-  }).catch(err => {
-    mylog(err)
-  })
+  console.log("save", payload)
+  // create profile, create script
+  // mod profile, create script
+  // mod profile, mod script
+  if (selectedScriptItemIsFromDB && selectedProfileItemIsFromDB) {
+    // axios.post_json('/script/update', payload, (resp) => ElMessage.success('saved'))
+  } else {
+    ElMessage.error("暂不支持新增，请到数据库新增")
+  }
 }
-const connect = () => {
+const connect_to_socket = () => {
   if (!address.value || !port.value) {
     ElMessage.error('Please enter both address and port.')
     return
   }
-  log.value = []
+  logFromTelnet.value = []
   if (socket) {
     socket.close()
   }
@@ -119,10 +191,10 @@ const connect = () => {
   }
   socket.onmessage = (event) => {
     console.log("recv", event, event.data)
-    if (log.value.length > 1000) {
-      log.value.shift()
+    if (logFromTelnet.value.length > 1000) {
+      logFromTelnet.value.shift()
     }
-    log.value.push(event.data)
+    logFromTelnet.value.push(event.data)
   }
   socket.onclose = () => {
     connected.value = false
@@ -134,38 +206,12 @@ const connect = () => {
 }
 
 const sendMessage = () => {
-  socket.send(JSON.stringify({ command: input.value + line_break_sel.value }))
-  input.value = ''
+  socket.send(JSON.stringify({ command: commandToSend.value + line_break_sel.value }))
+  commandToSend.value = ''
 }
 
 const handleSendCmd = (data) => {
   socket.send(JSON.stringify({ command: data + line_break_sel.value }))
-}
-
-const props = {
-  lazy: true,
-  lazyLoad(node, resolve) {
-    // 模拟异步加载数据
-    const { level } = node
-    const nodes = []
-    axios.post('/script/all', {}, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    }).then(resp => {
-      console.log("here")
-      nodes.push(
-        ...resp.data.map((item, index) => {
-          return { ...item, leaf: true }
-        }),
-      )
-      resolve(nodes)
-    }).catch(err => {
-      mylog(err)
-    })
-
-    // 返回子节点数据
-  }
 }
 </script>
 

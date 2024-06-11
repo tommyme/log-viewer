@@ -30,4 +30,15 @@ instance.interceptors.response.use(response => {
   return Promise.reject(error);
 });
 
+instance.post_json = (path, data, callback) => {
+  instance.post(path, data, {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  }).then(resp => callback(resp))
+  .catch(err => {
+    console.log("axios-error", err)
+  })
+}
+
 export default instance;
