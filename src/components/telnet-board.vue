@@ -162,6 +162,7 @@ const save_script = () => {
       content: scriptEditorRef.value.code,
       port: port.value,
       host: address.value,
+      profile: selectedProfileItem.value.id,
     }
   }
   console.log("save", payload)
@@ -169,7 +170,7 @@ const save_script = () => {
   // mod profile, create script
   // mod profile, mod script
   if (selectedScriptItemIsFromDB && selectedProfileItemIsFromDB) {
-    // axios.post_json('/script/update', payload, (resp) => ElMessage.success('saved'))
+    axios.post_json('/script/update', payload, (resp) => ElMessage.success('saved'))
   } else {
     ElMessage.error("暂不支持新增，请到数据库新增")
   }
