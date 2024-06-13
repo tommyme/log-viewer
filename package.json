@@ -2,6 +2,7 @@
   "name": "@femessage/log-viewer",
   "version": "1.0.0",
   "description": "💻 View terminal logs in browser",
+  "type": "module",
   "author": "https://github.com/FEMessage",
   "license": "MIT",
   "repository": {
