@@ -31,9 +31,10 @@
     </el-header>
     <div>
       <div v-if="connected">
-        <LogViewer :height="500" :log="logFromTelnet" :loading="false" />
+        <LogViewer :height="500" :log="logFromTelnet" :loading="false" :filter-val="filterWords"/>
         <div class="input" style="display: flex">
           <el-input v-model="commandToSend" @keyup.enter="sendMessage" placeholder="Enter command"></el-input>
+          <el-input v-model="filterWords" placeholder="filter"></el-input>
           <el-cascader v-model="line_break_sel" :options="line_breaks_ops"/>
         </div>
       </div>
@@ -60,6 +61,7 @@ const line_breaks_ops = [
   { value: '\r',label: '\\r' },
   { value: '\n',label: '\\n' },
 ]
+const filterWords = ref("")
 onMounted(() => {
   loadProfiles()
 })
