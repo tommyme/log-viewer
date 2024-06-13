@@ -4,6 +4,7 @@
     v-model="code"
     :highlight="highlighter"
     line-numbers
+    ref="editor"
   ></prism-editor>
   <el-button @click="sendCurrLine">curr</el-button>
   <el-button @click="sendCurrLineMove" type="primary">next</el-button>
@@ -25,14 +26,14 @@ import { highlight, languages } from "prismjs/components/prism-core";
 import "prismjs/components/prism-bash";
 import "prismjs/themes/prism-tomorrow.css"; // import syntax highlighting styles
 const highlighter = (code) => highlight(code, languages.bash); //returns html
-
+const editor = ref()
 const code = ref("")
 defineExpose({
   code
 })
 // const currLine = editor_textarea.selectionStart
 function getLineNumber() {
-  const editor_textarea = document.querySelector(".prism-editor__textarea");
+  const editor_textarea = editor.value.$el.querySelector('textarea');
   if (editor_textarea) {
     return (
       editor_textarea.value
@@ -44,7 +45,7 @@ function getLineNumber() {
   }
 }
 function selectNextLineEnd() {
-  const editor_textarea = document.querySelector(".prism-editor__textarea");
+  const editor_textarea = editor.value.$el.querySelector('textarea')
   if (editor_textarea) {
     const currentLine = getLineNumber();
     const allLines = editor_textarea.value.split("\n");
@@ -70,7 +71,7 @@ function selectNextLineEnd() {
   }
 }
 function getCursorLineContent() {
-  const editor_textarea = document.querySelector(".prism-editor__textarea");
+  const editor_textarea = editor.value.$el.querySelector('textarea');
   if (editor_textarea) {
     const currentLine = getLineNumber(editor_textarea);
     const allLines = editor_textarea.value.split("\n");
