@@ -13,6 +13,7 @@
     >
     </virtual-list>
     <div class="switch">
+      <div style="background-color: ghostwhite; text-align: center; border-radius: 6px">{{ lastUpdate }}</div>
       <el-switch v-model="toBottom" size="large" 
       inline-prompt active-text="实时查看" inactive-text="实时查看"
       style="--el-switch-off-color: #636e72"/>
@@ -26,6 +27,7 @@ import VirtualList from 'vue3-virtual-scroll-list'
 import LineWrapper from './line-wrapper.vue'
 import LogLoading from './loading.vue'
 import parse from '../utils'
+import { formatTime } from '../utils/time'
 
 const props = defineProps({
   /**
@@ -92,6 +94,8 @@ const props = defineProps({
     default: ""
   }
 })
+
+const lastUpdate = ref("")
 const toBottom = ref(false)
 const virturalList = ref(null)
 const start = ref(0)
@@ -117,6 +121,7 @@ const lines = computed(() => {
       index += 1
     })
   })
+  lastUpdate.value = formatTime(new Date())
   return res
 })
 
