@@ -1,13 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
+export const myroutes = [
+  { path: '/', name: 'home', component: () => import("../layout/MainLayout.vue"),
+    children: [
+      { path: 'viewer', name: 'viewer', component: () => import('../views/HomeView.vue') },
+      { path: 'telnet', name: 'telnet', component: () => import('../views/TelnetView.vue') },
+      { path: 'reg64', name: 'reg64', component: () => import('../views/Reg64View.vue') },
+      { path: 'editor', name: 'editor', component: () => import('../views/EditorView.vue') },
+    ]
+  },
+]
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    // { path: '/', name: 'home', component: ()=>{import('../views/HomeView.vue')} },
-    { path: '/', name: 'home', component: HomeView },
-    { path: '/telnet', name: 'telnet', component: () => import('../views/TelnetView.vue') },
-  ]
+  routes: myroutes
 })
 
 export default router

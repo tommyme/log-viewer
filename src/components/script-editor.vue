@@ -116,6 +116,7 @@ function sendCurrLineMove() {
   margin: 10px auto;
   border-radius: 14px;
   border: 4px solid #fff;
+  box-sizing: border-box;
   box-shadow: #999999 0 0 8px;
 }
 
