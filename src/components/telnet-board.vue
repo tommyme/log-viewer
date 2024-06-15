@@ -10,7 +10,7 @@
             <el-option v-for="item in profiles" :key="item.name" :label="item.name" :value="item.name" style="padding-right: 16px;">
               <div style="display: flex; align-items: center; ">
                 <span style="flex-grow: 1; padding-right: 16px;">{{ item.name }}</span>
-                <el-icon class="del-icon" @click="handle_del_profile($event, item)" style="font-size: 18px;"><CircleClose /></el-icon>
+                <delIcon @click="handle_del_profile($event, item)"/>
               </div>
             </el-option>
           </el-select>
@@ -58,6 +58,7 @@ import { ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
 import LogViewer from '../components/log-viewer.vue';
 import scriptEditor from '../components/script-editor.vue';
+import delIcon from "../components/del-icon.vue";
 import axios from '../req'
 const line_break_sel = ref("\r")
 const scriptEditorRef = ref()
@@ -260,23 +261,6 @@ const handleSendCmd = (data) => {
   padding-bottom: 8px;
 }
 
-.delete-button {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
-  text-align: center;
-  margin-left: 10px;
-  cursor: pointer;
-  border-radius: 50%;
-  background-color: red;
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-}
-.del-icon:hover {
-  color: red
-}
 </style>
 
 <style>

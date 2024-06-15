@@ -5,10 +5,13 @@
         <el-cascader v-model="selectedOptions" placeholder="select case iteration" :props="props" @change="handleChange"
           @expand-change="handleExpandChange" @focus="handleFocus" style="width: 450px;" filterable>
           <template #default="{ node, data }" style="position: relative;">
-            <span>{{ data.label }}</span>
-            <span v-if="!node.isLeaf"> ({{ node.children.length }}) </span>
-            <el-button @click="handleDelete($event, node)" type="danger" circle
-              style="width: 10px; height: 10px; position: absolute; right: 12px; top: 8px">x</el-button>
+            <div style="display: flex; align-items: center">
+              <div style="flex-grow: 1;">
+                <span>{{ data.label }}</span>
+                <span v-if="!node.isLeaf"> ({{ node.children.length }}) </span>
+              </div>
+              <DelIcon @click="handleDelete($event, node)" type="danger" circle />
+            </div>
           </template>
         </el-cascader>
       </div>
@@ -42,6 +45,7 @@ import { Search } from '@element-plus/icons-vue';
 import { computed, ref } from 'vue'
 import { ElCascader } from 'element-plus'
 import axios from '../req'
+import DelIcon from './del-icon.vue';
 const emit = defineEmits(['ready'])
 const mylog = (...content) => {
   console.log("log-sel", ...content)
