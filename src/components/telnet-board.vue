@@ -7,7 +7,12 @@
           <el-select v-model="selectedProfileName" clearable allow-create filterable 
             placeholder="select profile" @change="profileChange" @clear="() => selectedProfileItem"
           >
-            <el-option v-for="item in profiles" :key="item.name" :label="item.name" :value="item.name"/>
+            <el-option v-for="item in profiles" :key="item.name" :label="item.name" :value="item.name" style="padding-right: 16px;">
+              <div style="display: flex; align-items: center; ">
+                <span style="flex-grow: 1; padding-right: 16px;">{{ item.name }}</span>
+                <el-icon class="del-icon" @click="handle_del_profile($event, item)" style="font-size: 18px;"><CircleClose /></el-icon>
+              </div>
+            </el-option>
           </el-select>
         </el-col>
         <el-col :span="4">
@@ -69,7 +74,14 @@ const loadProfiles = () => {
   axios.post_json('/script/allProfiles', {}, (resp) => {profiles.value = resp.data})
 }
 const loadScripts = () => {
-  axios.post_json('/script/allScripts', {name: selectedProfileItem.value.name}, (resp) => {scripts.value = resp.data})
+  axios.post_json('/script/allScripts', {name: selectedProfileItem.value.name}, (resp) => {
+    scripts.value = resp.data
+    console.log("load scripts", scripts.value)
+  })
+}
+const handle_del_profile = (event, item) => {
+  event.stopPropagation();
+  console.log("handle del", item)
 }
 const profileChange = (val) => {
   // 清空的时候 初始化
@@ -127,7 +139,8 @@ const selectedScriptItem = computed(() => {
   if (selectedScriptName.value === undefined) {   // 清空之后
     selectedScriptItemIsFromDB.value = false
     return {
-      name: "",
+      sid: -1,
+      sname: "",
       content: "",
       profile: selectedProfileItem.value.id,
     }
@@ -139,8 +152,9 @@ const selectedScriptItem = computed(() => {
     } else {        // 自定义添加的
       selectedScriptItemIsFromDB.value = false
       return {
-        name: selectedScriptName.value,
-        content: "",
+        sid: -1,
+        sname: selectedScriptName.value,
+        content: "# new script",
         profile: "",
       }
     }
@@ -171,8 +185,11 @@ const save_script = () => {
   // create profile, create script
   // mod profile, create script
   // mod profile, mod script
-  if (selectedScriptItemIsFromDB && selectedProfileItemIsFromDB) {
-    axios.post_json('/script/update', payload, (resp) => ElMessage.success('saved'))
+  if (selectedProfileItemIsFromDB.value) {
+    axios.post_json('/script/update', payload, (resp) => {
+      loadScripts()
+      ElMessage.success('saved')
+    })
   } else {
     ElMessage.error("暂不支持新增，请到数据库新增")
   }
@@ -243,6 +260,23 @@ const handleSendCmd = (data) => {
   padding-bottom: 8px;
 }
 
+.delete-button {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  margin-left: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+.del-icon:hover {
+  color: red
+}
 </style>
 
 <style>
