@@ -31,7 +31,7 @@ instance.interceptors.response.use(response => {
 });
 
 instance.post_json = (path, data, callback) => {
-  instance.post(path, data, {
+  return instance.post(path, data, {
     headers: {
       'Content-Type': 'application/json'
     },

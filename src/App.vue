@@ -5,4 +5,11 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <RouterView />
 </template>
-<style lang="less"></style>
+<style lang="less">
+body {
+  margin: 0px
+}
+* {
+  box-sizing: border-box;
+}
+</style>

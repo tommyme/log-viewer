@@ -1,42 +1,42 @@
 <template>
-  <div style="width: 750px;">
-    <el-header>
-      <el-row :gutter="10">
-        <el-col :span="6">
-          <!-- 这里@clear用来触发computed -->
-          <el-select v-model="selectedProfileName" clearable allow-create filterable 
-            placeholder="select profile" @change="profileChange" @clear="() => selectedProfileItem"
-          >
-            <el-option v-for="item in profiles" :key="item.name" :label="item.name" :value="item.name" style="padding-right: 16px;">
-              <div style="display: flex; align-items: center; ">
-                <span style="flex-grow: 1; padding-right: 16px;">{{ item.name }}</span>
-                <delIcon @click="handle_del_profile($event, item)"/>
-              </div>
-            </el-option>
-          </el-select>
-        </el-col>
-        <el-col :span="4">
-          <el-input v-model="address" placeholder="addr"></el-input>
-        </el-col>
-        <el-col :span="4">
-          <el-input v-model="port" placeholder="port"></el-input>
-        </el-col>
-        <el-col :span="2">
-          <el-button type="primary" @click="connect_to_socket" :icon="Connection" ></el-button>
-        </el-col>
-        <el-col :span="6">
-          <el-select 
-            v-model="selectedScriptName" clearable allow-create filterable 
-            placeholder="select script" @change="scriptChange" :disabled="!selectedProfileItemIsFromDB"
-          >
-            <el-option v-for="item in scripts" :key="item.sname" :label="item.sname" :value="item.sname"/>
-          </el-select>
-        </el-col>
-      </el-row>
-    </el-header>
-    <div>
-      <div v-if="connected">
-        <LogViewer :height="500" :log="logFromTelnet" :loading="false" :filter-val="filterWords"/>
+  <div style="height: 100%;">
+    <div :class="top_class" style="height: 100%">
+      <div class="conn-board" style="display: flex;flex-direction: column">
+        <div style="margin: 0px 16px 16px 16px">
+          <el-row :gutter="10">
+            <el-col :span="6">
+              <!-- 这里@clear用来触发computed -->
+              <el-select v-model="selectedProfileName" clearable allow-create filterable 
+                placeholder="select profile" @change="profileChange" @clear="() => selectedProfileItem"
+              >
+                <el-option v-for="item in profiles" :key="item.name" :label="item.name" :value="item.name" style="padding-right: 16px;">
+                  <div style="display: flex; align-items: center; ">
+                    <span style="flex-grow: 1; padding-right: 16px;">{{ item.name }}</span>
+                    <delIcon @click="handle_del_profile($event, item)"/>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="4">
+              <el-input v-model="address" placeholder="addr"></el-input>
+            </el-col>
+            <el-col :span="4">
+              <el-input v-model="port" placeholder="port"></el-input>
+            </el-col>
+            <el-col :span="2">
+              <el-button type="primary" @click="connect_to_socket" :icon="Connection" ></el-button>
+            </el-col>
+            <el-col :span="6">
+              <el-select 
+                v-model="selectedScriptName" clearable allow-create filterable 
+                placeholder="select script" @change="scriptChange" :disabled="!selectedProfileItemIsFromDB"
+              >
+                <el-option v-for="item in scripts" :key="item.sname" :label="item.sname" :value="item.sname"/>
+              </el-select>
+            </el-col>
+          </el-row>
+        </div>
+        <LogViewer style="flex-grow: 1" :height="700" :log="logFromTelnet" :loading="false" :filter-val="filterWords"/>
         <div class="input" style="display: flex">
           <el-input v-model="commandToSend" @keyup.enter="sendMessage" placeholder="Enter command"></el-input>
           <el-input v-model="filterWords" placeholder="filter"></el-input>
@@ -44,9 +44,10 @@
         </div>
       </div>
       
-      <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)"></script-editor>
-      <el-button @click="telnetview_log(selectedProfileItem, selectedScriptItem, selectedProfileItemIsFromDB)" >check script</el-button>
-      <el-button @click="save_script" >save</el-button>
+      <div class="script-board">
+        <div class="fake"></div>
+        <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)" @save="save_script"></script-editor>
+      </div>
     </div>
   </div>
 </template>
@@ -67,6 +68,15 @@ const line_breaks_ops = [
   { value: '\r',label: '\\r' },
   { value: '\n',label: '\\n' },
 ]
+const props = defineProps({
+  direction: {
+    type: Boolean,
+    default: false
+  }
+})
+const top_class = computed(() => {
+  return props.direction ? 'boards-container-row': 'boards-container-col'
+})
 const filterWords = ref("")
 onMounted(() => {
   loadProfiles()
@@ -75,7 +85,7 @@ const loadProfiles = () => {
   axios.post_json('/script/allProfiles', {}, (resp) => {profiles.value = resp.data})
 }
 const loadScripts = () => {
-  axios.post_json('/script/allScripts', {name: selectedProfileItem.value.name}, (resp) => {
+  return axios.post_json('/script/allScripts', {name: selectedProfileItem.value.name}, (resp) => {
     scripts.value = resp.data
     console.log("load scripts", scripts.value)
   })
@@ -95,7 +105,13 @@ const profileChange = (val) => {
   } else {
     port.value = selectedProfileItem.value.port
     address.value = selectedProfileItem.value.host
-    loadScripts()
+    loadScripts().then(() => {
+      if (scripts.value.length > 0) {
+        let name = scripts.value[0]
+        selectedScriptName.value = name
+        scriptChange(name)  // 模拟触发一下change事件
+      }
+    })
   }
 }
 const scriptChange = (val) => {
@@ -236,35 +252,41 @@ const handleSendCmd = (data) => {
 }
 </script>
 
-<style scoped>
-.el-container {
-  height: 100vh;
-}
-
-.messages {
-  height: 400px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-}
-
-.message {
-  padding: 5px;
-  border-bottom: 1px solid #eee;
-}
-
+<style scoped lang="scss">
 .input {
   width: 98%;
   margin: 10px auto;
 }
-.el-header {
-  height: auto;
-  padding-bottom: 8px;
+
+.boards-container-row {
+  display: flex;
+  justify-content: space-between;
+  .script-board {
+    .fake {
+      height: 48px;
+      flex-shrink: 0;
+    }
+  }
+}
+.boards-container-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.script-board {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 48%;
+}
+.conn-board {
+  flex-basis: 48%;
 }
 
 </style>
 
 <style>
 .log-viewer {
-  height: 500px
+  box-sizing: border-box;
+  height: 100%
 }
 </style>

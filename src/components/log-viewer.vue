@@ -222,7 +222,6 @@ function onscroll(event, data) {
 
 <style lang="less" scoped>
 .log-viewer {
-  width: 98%;
   margin: 0 auto;
   font-size: 16px;
   line-height: 1.8;
@@ -232,6 +231,7 @@ function onscroll(event, data) {
   border-radius: 14px;
   border: 4px solid #fff;
   box-shadow: #999999 0px 0px 8px;
+  height: 100%;
 }
 /* 整体样式 */
 ::-webkit-scrollbar {
@@ -259,7 +259,7 @@ function onscroll(event, data) {
 .switch{
   position: absolute;
   bottom: 0.6%;
-  right:2.2%;
+  right: 0.8vw;
 }
 :deep(.el-switch__inner .is_text){
   color: #2d3436;

@@ -5,9 +5,13 @@
     :highlight="highlighter"
     line-numbers
     ref="editor"
+    @click="editorFocus"
   ></prism-editor>
-  <el-button @click="sendCurrLine">curr</el-button>
-  <el-button @click="sendCurrLineMove" type="primary">next</el-button>
+  <div class="btn-group">
+    <el-button @click="sendCurrLine">curr</el-button>
+    <el-button @click="sendCurrLineMove" type="primary">next</el-button>
+    <el-button @click="saveScript" >save</el-button>
+  </div>
 </template>
 
 <script setup>
@@ -18,7 +22,7 @@ import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhe
 const mylog = (...content) => {
   console.log("editor", ...content);
 };
-const emit = defineEmits(["sendcmd"]);
+const emit = defineEmits(["sendcmd", "save"]);
 // import highlighting library (you can use any library you want just return html string)
 import { highlight, languages } from "prismjs/components/prism-core";
 // import "prismjs/components/prism-clike";
@@ -85,6 +89,12 @@ function getCursorLineContent() {
     return null;
   }
 }
+function editorFocus() {
+  const editor_textarea = editor.value.$el.querySelector('textarea');
+  if (editor_textarea) {
+    editor_textarea.focus()
+  }
+}
 function sendCurrLine() {
   const line = getCursorLineContent();
   console.log(line);
@@ -94,11 +104,14 @@ function sendCurrLineMove() {
   sendCurrLine();
   selectNextLineEnd();
 }
+function saveScript() {
+  emit("save")
+}
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .my-editor {
-  background: #2d3436;
+  background: rgb(0, 36, 81);
   color: #ccc;
 
   font-family:
@@ -111,15 +124,20 @@ function sendCurrLineMove() {
   font-size: 14px;
   line-height: 1.5;
   padding: 5px;
-  height: 400px;
-  width: 98%;
-  margin: 10px auto;
+  // height: 400px;
+  flex-grow: 1;
   border-radius: 14px;
   border: 4px solid #fff;
   box-sizing: border-box;
   box-shadow: #999999 0 0 8px;
 }
+.btn-group {
+  width: 98%;
+  margin: 10px auto;
+}
+</style>
 
+<style>
 .prism-editor__textarea:focus {
   outline: none;
 }

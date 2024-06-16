@@ -82,11 +82,14 @@ function socket_get_data(payload) {
       clearable
     />
     </div>
-    <LogViewer :log="log" :loading="loading" :filter-val="filter_val"></LogViewer>
+    <LogViewer class="viewer" style="height: 50vh" :log="log" :loading="loading" :filter-val="filter_val"></LogViewer>
   </div>
 </template>
 <style lang="less" scoped>
 .filter_input{
   margin: 10px 20px;
+}
+.viewer {
+  margin: 16px
 }
 </style>
