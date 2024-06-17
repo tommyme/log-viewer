@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="display: flex;justify-content: space-between;height: 100vh" :style="{'flex-direction': direction?'column':'row'}">
-      <TelnetBoard v-for="id in board_ids" :key="id" class="item" :direction="direction" :class="{'sp-border': currKey == id}"></TelnetBoard>
+      <TelnetBoard v-for="id in board_ids" :key="id" class="item" :style="mystyle" :direction="direction" :class="{'sp-border': currKey == id}"></TelnetBoard>
     </div>
     <TelnetBoardFooter v-model="board_ids" v-model:direction="direction" v-model:currKey="currKey" />
     <div class="hover-area" @mouseover="showNav"></div>
@@ -11,7 +11,7 @@
 <script setup>
 import TelnetBoard from '../components/telnet-board.vue'
 import TelnetBoardFooter from '../components/telnet-board-footer.vue'
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 const board_ids = ref([1])
 const currKey = ref(-1)
 const getNum = () => {
@@ -42,7 +42,10 @@ const showNav = () => {
     nav.classList.add('is-visible');
   }
 };
-
+const mystyle = computed(() => {
+  let res = direction.value ? {'max-height': `calc(100%/${board_ids.value.length})`} : {'max-width': `calc(100%/${board_ids.value.length})`}
+  return res
+})
 </script>
 
 <style scoped>

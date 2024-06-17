@@ -1,7 +1,7 @@
 <template>
-  <div style="position: relative;">
+  <div style="position: relative; max-height: calc(100%-64px);">
     <virtual-list
-      style="max-height: 880px; overflow-y: auto;"
+      style="max-height: 100%; overflow-y: auto;"
       class="log-viewer mono"
       ref="virturalList"
       v-bind="virtualAttrs"
