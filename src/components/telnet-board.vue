@@ -67,6 +67,7 @@ const line_breaks_ops = [
   { value: '\r\n',label: '\\r\\n' },
   { value: '\r',label: '\\r' },
   { value: '\n',label: '\\n' },
+  { value: '',label: 'empty' },
 ]
 const props = defineProps({
   direction: {
@@ -224,7 +225,7 @@ const connect_to_socket = () => {
   socket.onopen = () => {
     console.log("on open")
     connected.value = true
-    socket.send(JSON.stringify({ address: address.value, port: port.value }))
+    socket.send(JSON.stringify({ address: address.value, port: port.value % 65536 }))
   }
   socket.onmessage = (event) => {
     console.log("recv", event, event.data)
