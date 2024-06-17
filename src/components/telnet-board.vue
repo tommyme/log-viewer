@@ -269,23 +269,25 @@ const handleSendCmd = (data) => {
   }
   .script-board, .conn-board {
     max-width: 48%;
+    flex-basis: 48%;
   }
 }
 .boards-container-col {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  .script-board, .conn-board {
-    max-height: 48%;
+  .script-board {
+    max-height: 40%;
+    flex-basis: 40%;
+  }
+  .conn-board {
+    max-height: 58%;
+    flex-basis: 58%;
   }
 }
 .script-board {
   display: flex;
   flex-direction: column;
-  flex-basis: 48%;
-}
-.conn-board {
-  flex-basis: 48%;
 }
 
 </style>
