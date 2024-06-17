@@ -107,7 +107,7 @@ const profileChange = (val) => {
     address.value = selectedProfileItem.value.host
     loadScripts().then(() => {
       if (scripts.value.length > 0) {
-        let name = scripts.value[0]
+        let name = scripts.value[0].sname
         selectedScriptName.value = name
         scriptChange(name)  // 模拟触发一下change事件
       }
