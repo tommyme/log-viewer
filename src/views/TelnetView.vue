@@ -5,12 +5,17 @@
     </div>
     <TelnetBoardFooter v-model="board_ids" v-model:direction="direction" v-model:currKey="currKey" />
     <div class="hover-area" @mouseover="showNav"></div>
+    <CommandPalette />
   </div>
 </template>
 
 <script setup>
 import TelnetBoard from '../components/telnet-board.vue'
 import TelnetBoardFooter from '../components/telnet-board-footer.vue'
+import CommandPalette from '../components/CommandPalette.vue';
+import { registerCommand } from '../utils/commands.js';
+registerCommand('sayHello', () => alert('Hello!'));
+
 import { ref, watch, computed } from 'vue';
 const board_ids = ref([1])
 const currKey = ref(-1)

@@ -24,7 +24,10 @@
               <el-input v-model="port" placeholder="port"></el-input>
             </el-col>
             <el-col :span="2">
-              <el-button :type="connected?'danger':'primary'" @click="toggle_conn" :icon="connected?Close:Connection" ></el-button>
+              <el-button :type="connected?'danger':'primary'" 
+                @click="toggle_conn" :icon="connected?Close:Connection"
+                :disabled="disableConnBtn"
+              ></el-button>
             </el-col>
             <el-col :span="5">
               <el-select 
@@ -37,6 +40,11 @@
             <el-col :span="3">
               <el-select v-model="conn_type" placeholder="type">
                 <el-option v-for="tp in ['ssh', 'telnet']" :key="tp" :label="tp" :value="tp"/>
+                <template #footer>
+                  <el-button bg size="small" @click="dialogVisible = true">
+                    credit
+                  </el-button>
+                </template>
               </el-select>
             </el-col>
           </el-row>
@@ -54,6 +62,21 @@
         <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)" @save="save_all"></script-editor>
       </div>
     </div>
+    <el-dialog
+      v-model="dialogVisible"
+      title="edit ssh credit"
+      width="500"
+    >
+      <span>This is a dialog</span>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="dialogVisible = false">
+            Confirm
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -68,7 +91,16 @@ import delIcon from "../components/del-icon.vue";
 import axios from '../req'
 const line_break_sel = ref("\r")
 const scriptEditorRef = ref()
-let currSshCredit = {}
+const currSshCredit = computed(() => {
+  if (sshCredits.value.length > 0) {
+    return sshCredits.value[0]
+  }
+  return undefined
+})
+const disableConnBtn = computed(() => {
+  return conn_type.value === 'ssh' && currSshCredit.value === undefined
+})
+const dialogVisible = ref(false)
 const sshCredits = ref([])
 const line_breaks_ops = [
   { value: '\r\n',label: '\\r\\n' },
@@ -110,6 +142,7 @@ const profileChange = (val) => {
     conn_type.value = ''
     scripts.value = []
     selectedScriptName.value = undefined
+    sshCredits.value = []
     // todo: clear code
   } else {
     port.value = selectedProfileItem.value.port
@@ -125,8 +158,12 @@ const profileChange = (val) => {
       })
     } else if (selectedProfileItem.value.type === "ssh") {
       loadSshCredits().then(() => {
-        console.log(sshCredits.value[0])
-        currSshCredit = sshCredits.value[0]
+        if (sshCredits.value.length === 0) {
+          ElMessage.warning("ssh credit empty")
+        } else {
+          console.log(sshCredits.value[0])
+          ElMessage.success("ssh credit loaded")
+        }
       })
       loadScripts().then(() => {
         if (scripts.value.length > 0) {
@@ -311,8 +348,8 @@ const connect_to_ssh = () => {
     socket.send(JSON.stringify({
       host: selectedProfileItem.value.host,
       port: selectedProfileItem.value.port,
-      name: currSshCredit.name,
-      passwd: currSshCredit.passwd
+      name: currSshCredit.value.name,
+      passwd: currSshCredit.value.passwd
     }))
   }
   socket.onmessage = (event) => {
