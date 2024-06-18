@@ -24,14 +24,19 @@
               <el-input v-model="port" placeholder="port"></el-input>
             </el-col>
             <el-col :span="2">
-              <el-button type="primary" @click="connect_to_socket" :icon="Connection" ></el-button>
+              <el-button :type="connected?'danger':'primary'" @click="toggle_conn" :icon="connected?Close:Connection" ></el-button>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="5">
               <el-select 
                 v-model="selectedScriptName" clearable allow-create filterable 
                 placeholder="select script" @change="scriptChange" :disabled="!selectedProfileItemIsFromDB"
               >
                 <el-option v-for="item in scripts" :key="item.sname" :label="item.sname" :value="item.sname"/>
+              </el-select>
+            </el-col>
+            <el-col :span="3">
+              <el-select v-model="conn_type" placeholder="type">
+                <el-option v-for="tp in ['ssh', 'telnet']" :key="tp" :label="tp" :value="tp"/>
               </el-select>
             </el-col>
           </el-row>
@@ -53,7 +58,7 @@
 </template>
 
 <script setup>
-import {Connection} from '@element-plus/icons-vue';
+import {Close, Connection, Switch} from '@element-plus/icons-vue';
 import { computed, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -100,12 +105,14 @@ const profileChange = (val) => {
   if (val === undefined) {
     port.value = ''
     address.value = ''
+    conn_type.value = ''
     scripts.value = []
     selectedScriptName.value = undefined
     // todo: clear code
   } else {
     port.value = selectedProfileItem.value.port
     address.value = selectedProfileItem.value.host
+    conn_type.value = selectedProfileItem.value.type
     loadScripts().then(() => {
       if (scripts.value.length > 0) {
         let name = scripts.value[0].sname
@@ -133,6 +140,7 @@ const selectedProfileItem = computed(() => {
       name: "",
       host: "",
       port: "",
+      type: "",
     }
   } else {
     let found = profiles.value.find(item => item.name == selectedProfileName.value)
@@ -145,6 +153,7 @@ const selectedProfileItem = computed(() => {
         name: selectedProfileName.value,
         host: "",
         port: "",
+        type: "",
       }
     }
   }
@@ -212,6 +221,17 @@ const save_script = () => {
     ElMessage.error("暂不支持新增，请到数据库新增")
   }
 }
+const conn_type = ref("telnet")
+const toggle_conn = () => {
+  if (connected.value) {
+    socket.close()
+    connected.value = false
+  } else if (conn_type.value === "telnet") {
+    connect_to_socket()
+  } else if (conn_type.value === "ssh") {
+    connect_to_ssh()
+  }
+}
 const connect_to_socket = () => {
   if (!address.value || !port.value) {
     ElMessage.error('Please enter both address and port.')
@@ -226,6 +246,38 @@ const connect_to_socket = () => {
     console.log("on open")
     connected.value = true
     socket.send(JSON.stringify({ address: address.value, port: port.value % 65536 }))
+  }
+  socket.onmessage = (event) => {
+    console.log("recv", event, event.data)
+    if (logFromTelnet.value.length > 1000) {
+      logFromTelnet.value.shift()
+    }
+    logFromTelnet.value.push(event.data)
+  }
+  socket.onclose = () => {
+    connected.value = false
+    ElMessage.info('Connection closed')
+  }
+  socket.onerror = (error) => {
+    ElMessage.error(`WebSocket error: ${error.message}`)
+  }
+}
+
+const connect_to_ssh = () => {
+  logFromTelnet.value = []
+  if (socket) {
+    socket.close()
+  }
+  socket = new WebSocket(`ws://localhost:8000/ssh`)
+  socket.onopen = () => {
+    console.log("on open")
+    connected.value = true
+    socket.send(JSON.stringify({
+      host: "",
+      port: 0,
+      name: "",
+      pass: ""
+    }))
   }
   socket.onmessage = (event) => {
     console.log("recv", event, event.data)
