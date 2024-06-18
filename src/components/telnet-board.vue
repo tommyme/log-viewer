@@ -51,7 +51,7 @@
       
       <div class="script-board">
         <div class="fake"></div>
-        <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)" @save="save_script"></script-editor>
+        <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)" @save="save_all"></script-editor>
       </div>
     </div>
   </div>
@@ -68,6 +68,8 @@ import delIcon from "../components/del-icon.vue";
 import axios from '../req'
 const line_break_sel = ref("\r")
 const scriptEditorRef = ref()
+let currSshCredit = {}
+const sshCredits = ref([])
 const line_breaks_ops = [
   { value: '\r\n',label: '\\r\\n' },
   { value: '\r',label: '\\r' },
@@ -113,14 +115,35 @@ const profileChange = (val) => {
     port.value = selectedProfileItem.value.port
     address.value = selectedProfileItem.value.host
     conn_type.value = selectedProfileItem.value.type
-    loadScripts().then(() => {
-      if (scripts.value.length > 0) {
-        let name = scripts.value[0].sname
-        selectedScriptName.value = name
-        scriptChange(name)  // 模拟触发一下change事件
-      }
-    })
+    if (selectedProfileItem.value.type === "telnet") {
+      loadScripts().then(() => {
+        if (scripts.value.length > 0) {
+          let name = scripts.value[0].sname
+          selectedScriptName.value = name
+          scriptChange(name)  // 模拟触发一下change事件
+        }
+      })
+    } else if (selectedProfileItem.value.type === "ssh") {
+      loadSshCredits().then(() => {
+        console.log(sshCredits.value[0])
+        currSshCredit = sshCredits.value[0]
+      })
+      loadScripts().then(() => {
+        if (scripts.value.length > 0) {
+          let name = scripts.value[0].sname
+          selectedScriptName.value = name
+          scriptChange(name)  // 模拟触发一下change事件
+        }
+      })
+    }
   }
+}
+
+const loadSshCredits = () => {
+  return axios.post_json('/ssh/credits', {name: selectedProfileItem.value.name}, (resp) => {
+    sshCredits.value = resp.data
+    console.log("load ssh credits", sshCredits.value)
+  })
 }
 const scriptChange = (val) => {
   if (val === undefined) {
@@ -137,7 +160,8 @@ const selectedProfileItem = computed(() => {
   if (selectedProfileName.value === undefined) {
     selectedProfileItemIsFromDB.value = false
     return {
-      name: "",
+      id: undefined,
+      name: undefined,
       host: "",
       port: "",
       type: "",
@@ -150,6 +174,7 @@ const selectedProfileItem = computed(() => {
     } else {
       selectedProfileItemIsFromDB.value = false
       return {
+        id: -1,
         name: selectedProfileName.value,
         host: "",
         port: "",
@@ -166,8 +191,8 @@ const selectedScriptItem = computed(() => {
   if (selectedScriptName.value === undefined) {   // 清空之后
     selectedScriptItemIsFromDB.value = false
     return {
-      sid: -1,
-      sname: "",
+      sid: undefined,
+      sname: undefined,
       content: "",
       profile: selectedProfileItem.value.id,
     }
@@ -182,7 +207,7 @@ const selectedScriptItem = computed(() => {
         sid: -1,
         sname: selectedScriptName.value,
         content: "# new script",
-        profile: "",
+        profile: selectedProfileItem.value.id,
       }
     }
   }
@@ -197,28 +222,39 @@ let socket = null
 const telnetview_log = (...content) => {
   console.log('telnetview', ...content)
 }
-const save_script = () => {
+const save_profile = () => {
   let payload = {
     ...selectedProfileItem.value,
+    port: port.value,
+    host: address.value,
+    type: conn_type.value,
+  }
+  axios.post_json('/profile/update', payload, (resp) => {
+    loadProfiles()
+    ElMessage.success('profile saved')
+  })
+}
+const save_script = () => {
+  let payload = {
     ...selectedScriptItem.value,
     ...{
       content: scriptEditorRef.value.code,
-      port: port.value,
-      host: address.value,
       profile: selectedProfileItem.value.id,
     }
   }
   console.log("save", payload)
-  // create profile, create script
-  // mod profile, create script
-  // mod profile, mod script
-  if (selectedProfileItemIsFromDB.value) {
-    axios.post_json('/script/update', payload, (resp) => {
-      loadScripts()
-      ElMessage.success('saved')
-    })
-  } else {
-    ElMessage.error("暂不支持新增，请到数据库新增")
+
+  axios.post_json('/script/update', payload, (resp) => {
+    loadScripts()
+    ElMessage.success('script saved')
+  })
+}
+const save_all = () => {
+  if (selectedProfileItem.value.id !== undefined) {
+    save_profile()
+  }
+  if (selectedScriptItem.value.sid !== undefined) {
+    save_script()
   }
 }
 const conn_type = ref("telnet")
@@ -273,10 +309,10 @@ const connect_to_ssh = () => {
     console.log("on open")
     connected.value = true
     socket.send(JSON.stringify({
-      host: "",
-      port: 0,
-      name: "",
-      pass: ""
+      host: selectedProfileItem.value.host,
+      port: selectedProfileItem.value.port,
+      name: currSshCredit.name,
+      passwd: currSshCredit.passwd
     }))
   }
   socket.onmessage = (event) => {
