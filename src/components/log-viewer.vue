@@ -227,7 +227,7 @@ function onscroll(event, data) {
   line-height: 1.8;
   background-color: #2d3436;
   overflow-x: auto;
-  padding: 20px 0;
+  padding: 40px 0;
   border-radius: 14px;
   border: 4px solid #fff;
   box-shadow: #999999 0px 0px 8px;
