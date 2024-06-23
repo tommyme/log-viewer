@@ -1,7 +1,7 @@
 <template>
   <prism-editor
     class="my-editor"
-    v-model="code"
+    v-model="interValue"
     :highlight="highlighter"
     line-numbers
     ref="editor"
@@ -15,14 +15,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { PrismEditor } from "vue-prism-editor";
 // import { expose } from 'vue';
 import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
 const mylog = (...content) => {
   console.log("editor", ...content);
 };
-const emit = defineEmits(["sendcmd", "save"]);
+const emit = defineEmits(["sendcmd", "save", 'update:modelValue']);
 // import highlighting library (you can use any library you want just return html string)
 import { highlight, languages } from "prismjs/components/prism-core";
 // import "prismjs/components/prism-clike";
@@ -34,6 +34,14 @@ const editor = ref()
 const code = ref("")
 defineExpose({
   code
+})
+const props = defineProps({
+  modelValue: { type: String, default: "" }
+})
+
+const interValue = computed({
+  get() {return props.modelValue},
+  set(val) {emit("update:modelValue", val)}
 })
 // const currLine = editor_textarea.selectionStart
 function getLineNumber() {

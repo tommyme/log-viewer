@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative; max-height: calc(100% - 100px);">
+  <div style="position: relative; max-height: calc(100% - 100px); max-width: 100%">
     <virtual-list
       style="max-height: 100%; overflow-y: auto;"
       class="log-viewer mono"

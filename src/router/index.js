@@ -7,6 +7,7 @@ export const myroutes = [
       { path: 'telnet', name: 'telnet', component: () => import('../views/TelnetView.vue') },
       { path: 'reg64', name: 'reg64', component: () => import('../views/Reg64View.vue') },
       { path: 'editor', name: 'editor', component: () => import('../views/EditorView.vue') },
+      { path: 'workflow', name: 'workflow', component: () => import('../views/WorkflowView.vue') },
     ]
   },
 ]

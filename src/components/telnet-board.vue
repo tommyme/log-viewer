@@ -59,7 +59,7 @@
       
       <div class="script-board">
         <div class="fake"></div>
-        <script-editor ref="scriptEditorRef" @sendcmd="handleSendCmd($event)" @save="save_all"></script-editor>
+        <script-editor v-model="scriptEditorValue" @sendcmd="handleSendCmd($event)" @save="save_all"></script-editor>
       </div>
     </div>
     <el-dialog
@@ -90,7 +90,7 @@ import scriptEditor from '../components/script-editor.vue';
 import delIcon from "../components/del-icon.vue";
 import axios from '../req'
 const line_break_sel = ref("\r")
-const scriptEditorRef = ref()
+const scriptEditorValue = ref("")
 const currSshCredit = computed(() => {
   if (sshCredits.value.length > 0) {
     return sshCredits.value[0]
@@ -184,9 +184,9 @@ const loadSshCredits = () => {
 }
 const scriptChange = (val) => {
   if (val === undefined) {
-    scriptEditorRef.value.code = ""
+    scriptEditorValue.value = ""
   } else {
-    scriptEditorRef.value.code = selectedScriptItem.value.content
+    scriptEditorValue.value = selectedScriptItem.value.content
   }
 }
 const profiles = ref([])
@@ -197,7 +197,7 @@ const selectedProfileItem = computed(() => {
   if (selectedProfileName.value === undefined) {
     selectedProfileItemIsFromDB.value = false
     return {
-      id: undefined,
+      id: null,
       name: undefined,
       host: "",
       port: "",
@@ -211,7 +211,7 @@ const selectedProfileItem = computed(() => {
     } else {
       selectedProfileItemIsFromDB.value = false
       return {
-        id: -1,
+        id: null,
         name: selectedProfileName.value,
         host: "",
         port: "",
@@ -241,7 +241,7 @@ const selectedScriptItem = computed(() => {
     } else {        // 自定义添加的
       selectedScriptItemIsFromDB.value = false
       return {
-        sid: -1,
+        sid: undefined,
         sname: selectedScriptName.value,
         content: "# new script",
         profile: selectedProfileItem.value.id,
@@ -260,6 +260,7 @@ const telnetview_log = (...content) => {
   console.log('telnetview', ...content)
 }
 const save_profile = () => {
+  console.log("save_profile")
   let payload = {
     ...selectedProfileItem.value,
     port: port.value,
@@ -275,7 +276,7 @@ const save_script = () => {
   let payload = {
     ...selectedScriptItem.value,
     ...{
-      content: scriptEditorRef.value.code,
+      content: scriptEditorValue.value,
       profile: selectedProfileItem.value.id,
     }
   }
