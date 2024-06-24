@@ -108,7 +108,7 @@ const create_profile = () => {
     ElMessage.error("name can't be empty")
     return
   }
-  let payload = {name: new_profile_name.value, workflow: JSON.stringify([{name: "example step"}]), id: -1}
+  let payload = {name: new_profile_name.value, workflow: JSON.stringify([{name: "example step"}]), id: null}
   axios.post_json('/workflow/save', payload, (resp) => {}).then(() => {
     ElMessage.success("create done")
     loadWorkflows()
